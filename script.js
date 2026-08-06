@@ -3,7 +3,7 @@
 // ==========================================================================
 // Ganti dengan URL Web App hasil deploy Google Apps Script Anda, contoh:
 // "https://script.google.com/macros/s/AKfycbXXXXXXXXXXXXXXXXXXXXXX/exec"
-const API_URL = "https://script.google.com/macros/s/AKfycbypIG48h8o5NMLPJmOjcO46FAGx9-J2OdCCMBeFPzgjqL7zfbAwkhysvHDG0Xm1unuj/exec";
+const API_URL = '/api/apps-script';
 
 // --- HELPER FETCH TERPUSAT KE APPS SCRIPT REST API ---
 // Catatan penting soal CORS:
@@ -19,7 +19,7 @@ async function apiRequest(action, { method = 'GET', params = {}, body = null } =
     throw new Error('API_URL belum diatur. Isi API_URL di script.js dengan URL Web App Apps Script Anda.');
   }
 
-  const url = new URL(API_URL);
+  const url = new URL(API_URL, window.location.origin);
   url.searchParams.set('action', action);
   Object.keys(params).forEach(key => {
     if (params[key] !== undefined && params[key] !== null) {
