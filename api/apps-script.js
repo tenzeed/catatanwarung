@@ -1,4 +1,4 @@
-onst APPS_SCRIPT_URL =
+const APPS_SCRIPT_URL =
   'https://script.google.com/macros/s/AKfycbypIG48h8o5NMLPJmOjcO46FAGx9-J2OdCCMBeFPzgjqL7zfbAwkhysvHDG0Xm1unuj/exec';
 
 module.exports = async (request, response) => {
