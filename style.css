@@ -1,0 +1,179 @@
+/* ==========================================================================
+   Catatan Warung Pro — style.css
+   Diekstrak dari markup asli (sebelumnya inline <style> di Apps Script
+   HtmlService). Tidak ada perubahan gaya visual, hanya pemisahan file.
+   ========================================================================== */
+
+/* Pengaman anti horizontal-scroll: apapun penyebabnya, body tidak akan
+       pernah lebih lebar dari viewport perangkat (HP/tablet/PC). */
+    html, body { max-width: 100%; overflow-x: hidden; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    img, table { max-width: 100%; }
+    .view-section { display: none; }
+    .view-section.active { display: block; animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* Filter rentang riwayat transaksi pelanggan */
+    .filter-riwayat-btn { color: #64748b; }
+    .filter-riwayat-btn.active { background: #ffffff; color: #15803d; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+
+    /* Bottom sheet / picker pelanggan modern */
+    @keyframes sheetSlideUp {
+      from { transform: translateY(24px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .sheet-slide-up { animation: sheetSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1); }
+
+    /* Grid produk & tombol qty: feedback tekan yang halus */
+    .produk-card, .qty-btn { transition: transform 0.12s ease, background-color 0.15s ease, border-color 0.15s ease; }
+    .produk-card:active, .qty-btn:active { transform: scale(0.94); }
+
+    /* ======================================================================
+       HEADER: NAVBAR RESPONSIVE FIX (Mobile)
+       ======================================================================
+       #userInfoHeader (ikon status bulat hijau + nama/role) sengaja HANYA
+       ditampilkan di layar desktop (>=768px). Sebelumnya skrip mengatur
+       elemen ini lewat inline style "display", yang menimpa utility
+       Tailwind "hidden md:flex" sehingga info tsb ikut muncul di mobile
+       dan membuat navbar padat/terpotong. Aturan !important di bawah ini
+       menjadi jaring pengaman terakhir: apa pun nilai inline style yang
+       diberikan skrip, elemen ini TETAP tidak akan tampil di layar < 768px. */
+    @media (max-width: 767px) {
+      #userInfoHeader { display: none !important; }
+    }
+
+    /* ======================================================================
+       TAMPILAN MODERN: LOADING / BERHASIL / GAGAL (proses penyimpanan data)
+       ====================================================================== */
+
+    /* --- BASE KOMPAK: berlaku untuk SEMUA popup SweetAlert2 di aplikasi
+       (loading, berhasil, gagal, peringatan validasi, konfirmasi hapus, dst)
+       agar tidak ada lagi popup berukuran besar/default. --- */
+    .swal2-popup {
+      width: 300px !important;
+      max-width: 88vw !important;
+      padding: 1.35rem 1.15rem 1.5rem !important;
+      border-radius: 20px !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
+    .swal2-title {
+      font-size: 0.98rem !important;
+      font-weight: 700 !important;
+      padding: 0 !important;
+      margin: 0.5rem 0 0.15rem !important;
+      line-height: 1.35 !important;
+    }
+    .swal2-html-container,
+    .swal2-content {
+      font-size: 12.5px !important;
+      line-height: 1.5 !important;
+      margin-top: 0.2rem !important;
+    }
+    .swal2-icon {
+      font-size: 0.58em !important;
+      margin: 0.35em auto 0.3em !important;
+    }
+    .swal2-actions {
+      margin-top: 0.9rem !important;
+      gap: 8px;
+    }
+    .swal2-confirm, .swal2-cancel {
+      font-size: 12.5px !important;
+      padding: 0.55rem 1.15rem !important;
+      border-radius: 12px !important;
+      box-shadow: none !important;
+      margin: 0 !important;
+    }
+    .swal2-timer-progress-bar-container { height: 4px !important; }
+
+    /* --- LOADING: kecil, di tengah, background transparan (bukan fullscreen) --- */
+    .swal-modern-loading-popup {
+      background: transparent !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      width: auto !important;
+    }
+    .modern-spinner-wrap {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 28px;
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 18px;
+      box-shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.28);
+    }
+    .modern-spinner {
+      width: 34px;
+      height: 34px;
+      border: 3.5px solid #dcfce7;
+      border-top-color: #16a34a;
+      border-radius: 50%;
+      animation: modernSpin 0.7s linear infinite;
+    }
+    @keyframes modernSpin { to { transform: rotate(360deg); } }
+    .modern-spinner-text {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    /* --- BERHASIL: ikon centang hijau, ringkas, auto tertutup --- */
+    .swal-modern-success-popup .swal2-title {
+      color: #166534 !important;
+    }
+    .swal-modern-success-popup .swal2-success-line-tip,
+    .swal-modern-success-popup .swal2-success-line-long { background-color: #16a34a !important; }
+    .swal-modern-success-popup .swal2-success-ring { border-color: rgba(22, 163, 74, 0.28) !important; }
+    .swal-modern-success-popup .swal2-icon.swal2-success .swal2-success-circular-line-left,
+    .swal-modern-success-popup .swal2-icon.swal2-success .swal2-success-circular-line-right { background: transparent !important; }
+    .swal-modern-success-popup .swal2-timer-progress-bar { background: #16a34a !important; }
+
+    /* --- GAGAL: ikon error modern + tombol Coba Lagi --- */
+    .swal-modern-error-popup .swal2-title {
+      color: #be123c !important;
+    }
+    .swal-modern-error-popup .swal2-html-container {
+      color: #64748b !important;
+    }
+    .swal-modern-error-popup .swal2-x-mark-line-left,
+    .swal-modern-error-popup .swal2-x-mark-line-right { background-color: #e11d48 !important; }
+    .swal-modern-error-popup .swal2-icon.swal2-error { border-color: #fecdd3 !important; }
+    .swal-modern-error-popup .swal2-confirm {
+      background-color: #16a34a !important;
+      border-radius: 12px !important;
+      font-weight: 700 !important;
+      font-size: 13px !important;
+      box-shadow: none !important;
+      padding: 0.6rem 1.3rem !important;
+    }
+    .swal-modern-error-popup .swal2-cancel {
+      background-color: #f1f5f9 !important;
+      color: #475569 !important;
+      border-radius: 12px !important;
+      font-weight: 600 !important;
+      font-size: 13px !important;
+      box-shadow: none !important;
+      padding: 0.6rem 1.3rem !important;
+    }
+
+    /* --- Animasi halus: Fade + Scale untuk popup Berhasil & Gagal --- */
+    @keyframes swalFadeScaleIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes swalFadeScaleOut {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0; transform: scale(0.85); }
+    }
+    .swal-fade-scale-in { animation: swalFadeScaleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important; }
+    .swal-fade-scale-out { animation: swalFadeScaleOut 0.16s ease-in !important; }

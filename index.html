@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Catatan Warung Pro</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Family Inter & Google Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            warung: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="h-full text-slate-800 antialiased flex flex-col min-h-screen">
+
+  <!-- NAVBAR -->
+  <header class="bg-gradient-to-r from-emerald-800 via-warung-800 to-teal-900 text-white sticky top-0 z-30 shadow-md border-b border-emerald-700/50">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
+      <!-- Left Side: Logo & Brand -->
+      <div class="flex items-center space-x-2.5 min-w-0 flex-shrink-0">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center shadow-inner flex-shrink-0">
+          <span class="material-icons-outlined text-emerald-300 text-xl sm:text-2xl">storefront</span>
+        </div>
+        <div class="min-w-0">
+          <h1 class="font-bold text-base sm:text-lg leading-tight tracking-wide truncate">Catatan Warung</h1>
+          <p class="text-[10px] sm:text-[11px] text-emerald-200/80 font-medium truncate hidden min-[380px]:block">Sistem Keuangan Modern</p>
+        </div>
+      </div>
+
+      <!-- Right Side: User Status & Actions -->
+      <div class="flex items-center space-x-2 flex-shrink-0">
+        <div id="userInfoHeader" class="hidden md:flex items-center space-x-2 bg-emerald-900/50 px-3 py-1.5 rounded-full border border-emerald-700/40">
+          <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+          <span id="txtUserRole" class="text-xs font-semibold text-emerald-100 truncate max-w-[150px]">Guest</span>
+        </div>
+        <button id="btnNotifikasiPengajuan" onclick="bukaModalPengajuanAdmin()" aria-label="Pengajuan Jajan Baru"
+          class="hidden relative w-9 h-9 items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 transition-all active:scale-95">
+          <span class="material-icons-outlined text-[21px]">notifications</span>
+          <span id="badgePengajuanPending" class="hidden absolute -top-1.5 -right-1.5 min-w-5 h-5 px-1 rounded-full bg-rose-500 text-white text-[10px] leading-5 font-extrabold text-center ring-2 ring-emerald-800">0</span>
+        </button>
+        <button id="btnPengaturanPelanggan" onclick="bukaModalPengaturanAkun()" aria-label="Pengaturan Akun"
+          class="hidden w-9 h-9 items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 transition-all active:scale-95">
+          <span class="material-icons-outlined text-[21px]">settings</span>
+        </button>
+        <button id="btnLogout" onclick="logout()" class="hidden items-center space-x-1.5 bg-rose-600/90 hover:bg-rose-600 text-white text-xs font-semibold px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl transition-all shadow-sm active:scale-95">
+          <span class="material-icons-outlined text-base sm:text-sm">logout</span>
+          <span class="hidden sm:inline">Keluar</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+
+    <!-- ================= VIEW 1: LOGIN ================= -->
+    <section id="viewLogin" class="view-section active">
+      <div class="min-h-[80vh] flex items-center justify-center p-2">
+        <div class="w-full max-w-md">
+          <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-100 overflow-hidden">
+            <!-- Header Card -->
+            <div class="bg-gradient-to-br from-emerald-600 to-teal-800 p-8 text-center text-white relative overflow-hidden">
+              <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+              <div class="inline-flex p-3 bg-white/10 rounded-2xl backdrop-blur-md mb-3 border border-white/20 shadow-inner">
+                <span class="material-icons-outlined text-4xl text-emerald-100">account_circle</span>
+              </div>
+              <h2 class="text-2xl font-bold">Selamat Datang</h2>
+              <p class="text-emerald-100/80 text-xs mt-1">Silakan masuk ke akun warung Anda</p>
+            </div>
+
+            <!-- Form -->
+            <form onsubmit="event.preventDefault(); handleLogin();" class="p-6 sm:p-8 space-y-5">
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Username</label>
+                <div class="relative">
+                  <span class="material-icons-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xl">person</span>
+                  <input type="text" id="loginUsername" placeholder="Masukkan username" required
+                    class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Password</label>
+                <div class="relative">
+                  <span class="material-icons-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xl">lock</span>
+                  <input type="password" id="loginPassword" placeholder="••••••••" required
+                    class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all">
+                </div>
+              </div>
+
+              <button type="submit"
+                class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center space-x-2 text-sm tracking-wide">
+                <span>MASUK AKUN</span>
+                <span class="material-icons-outlined text-sm">arrow_forward</span>
+              </button>
+            </form>
+          </div>
+          <p class="text-center text-xs text-slate-400 mt-6 font-medium">Catatan Warung Pro &copy; 2026</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================= VIEW 2: DASHBOARD ADMIN ================= -->
+    <section id="viewAdminDashboard" class="view-section space-y-6">
+      
+      <!-- Top Banner / Greeting -->
+      <div class="bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-900 rounded-2xl sm:rounded-3xl p-5 sm:p-6 text-white shadow-lg shadow-emerald-900/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Mode Admin</span>
+            <span id="liveClock" class="text-xs text-emerald-200/80 font-medium">--:-- WIB</span>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-bold mt-1">Ringkasan Keuangan Warung</h2>
+          <p class="text-emerald-100/70 text-xs sm:text-sm mt-0.5">Kelola piutang, penjualan, dan pelanggan secara real-time.</p>
+        </div>
+        
+        <div class="flex items-center space-x-2 self-start md:self-auto">
+          <button onclick="loadAdminData()" class="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold backdrop-blur-md border border-white/20 transition-all flex items-center space-x-1">
+            <span class="material-icons-outlined text-sm">refresh</span>
+            <span>Segarkan</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI METRICS GRID (Symmetrical 2 cols on Mobile, 4 cols on Desktop) -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
+        <!-- Total Hutang -->
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Piutang</span>
+            <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+              <span class="material-icons-outlined text-xl">account_balance_wallet</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <h3 class="text-lg sm:text-2xl font-extrabold text-rose-600 tracking-tight" id="dashTotalHutang">Rp0</h3>
+            <p class="text-[11px] text-slate-400 font-medium mt-0.5">Hutang pelanggan</p>
+          </div>
+        </div>
+
+        <!-- Pendapatan Hari Ini -->
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pendapatan</span>
+            <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <span class="material-icons-outlined text-xl">payments</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <h3 class="text-lg sm:text-2xl font-extrabold text-emerald-600 tracking-tight" id="dashPendapatan">Rp0</h3>
+            <p class="text-[11px] text-slate-400 font-medium mt-0.5">Pemasukan hari ini</p>
+          </div>
+        </div>
+
+        <!-- Total Deposit -->
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Deposit Pelanggan</span>
+            <div class="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
+              <span class="material-icons-outlined text-xl">savings</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <h3 class="text-lg sm:text-2xl font-extrabold text-sky-600 tracking-tight" id="dashDeposit">Rp0</h3>
+            <p class="text-[11px] text-slate-400 font-medium mt-0.5">Saldo mengendap</p>
+          </div>
+        </div>
+
+        <!-- Transaksi Hari Ini -->
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Transaksi</span>
+            <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <span class="material-icons-outlined text-xl">receipt_long</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <h3 class="text-lg sm:text-2xl font-extrabold text-slate-800 tracking-tight" id="dashTxCount">0</h3>
+            <p class="text-[11px] text-slate-400 font-medium mt-0.5">Aktivitas hari ini</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUICK ACTIONS GRID (5 Symmetrical Buttons) -->
+      <div>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Menu Operasional</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          
+          <!-- Catat Hutang -->
+          <button onclick="bukaModalCatatHutang()"
+            class="group bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-emerald-500 hover:shadow-md transition-all text-left flex flex-col justify-between h-32 active:scale-95">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <span class="material-icons-outlined text-2xl">add_shopping_cart</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm group-hover:text-emerald-700 transition-colors">Catat Hutang</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">Tambah kasbon baru</p>
+            </div>
+          </button>
+
+          <!-- Terima Bayar -->
+          <button onclick="bukaModalTerimaBayar()"
+            class="group bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-blue-500 hover:shadow-md transition-all text-left flex flex-col justify-between h-32 active:scale-95">
+            <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <span class="material-icons-outlined text-2xl">price_check</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm group-hover:text-blue-700 transition-colors">Terima Bayar</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">Pelunasan / cicilan</p>
+            </div>
+          </button>
+
+          <!-- Pelanggan -->
+          <button onclick="bukaModalPelanggan()"
+            class="group bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-amber-500 hover:shadow-md transition-all text-left flex flex-col justify-between h-32 active:scale-95">
+            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <span class="material-icons-outlined text-2xl">people_alt</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm group-hover:text-amber-700 transition-colors">Pelanggan</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">Kelola daftar kontak</p>
+            </div>
+          </button>
+
+          <!-- Produk -->
+          <button onclick="bukaModalProduk()"
+            class="group bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-purple-500 hover:shadow-md transition-all text-left flex flex-col justify-between h-32 active:scale-95">
+            <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <span class="material-icons-outlined text-2xl">inventory_2</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm group-hover:text-purple-700 transition-colors">Katalog Produk</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">Atur barang & harga</p>
+            </div>
+          </button>
+
+          <!-- Laporan -->
+          <button onclick="bukaModalLaporan()"
+            class="group bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-teal-500 hover:shadow-md transition-all text-left flex flex-col justify-between h-32 col-span-2 sm:col-span-1 active:scale-95">
+            <div class="w-10 h-10 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <span class="material-icons-outlined text-2xl">analytics</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm group-hover:text-teal-700 transition-colors">Laporan</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">Riwayat lengkap</p>
+            </div>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- RECENT TRANSACTIONS PREVIEW TABLE -->
+      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
+          <div>
+            <h3 class="font-bold text-slate-800 text-base">Aktivitas Terakhir</h3>
+            <p class="text-xs text-slate-400">Transaksi terbaru yang tercatat di warung</p>
+          </div>
+          <button onclick="bukaModalLaporan()" class="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center space-x-1">
+            <span>Lihat Semua</span>
+            <span class="material-icons-outlined text-sm">chevron_right</span>
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[560px] text-left text-xs sm:text-sm">
+            <thead class="bg-slate-50 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-100">
+              <tr>
+                <th class="py-3 px-4">Tanggal</th>
+                <th class="py-3 px-4">Pelanggan</th>
+                <th class="py-3 px-4">Tipe</th>
+                <th class="py-3 px-4">Detail</th>
+                <th class="py-3 px-4 text-right">Nominal</th>
+                <th class="py-3 px-4 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody id="tblRecentAdmin" class="divide-y divide-slate-100 text-slate-700">
+              <tr>
+                <td colspan="6" class="py-8 text-center text-slate-400 text-xs">Memuat aktivitas terbaru...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- ================= VIEW 3: DASHBOARD PELANGGAN ================= -->
+    <section id="viewCustomerDashboard" class="view-section space-y-5 sm:space-y-6">
+      
+      <!-- Welcome Header -->
+      <div class="bg-gradient-to-br from-slate-900 via-emerald-950 to-teal-900 rounded-3xl p-5 sm:p-6 text-white shadow-lg shadow-emerald-950/20 relative overflow-hidden">
+        <div class="relative z-10 flex flex-row items-center justify-between gap-3">
+          <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+            <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300 font-bold text-xl shadow-inner shrink-0">
+              <span class="material-icons-outlined text-xl sm:text-2xl">person</span>
+            </div>
+            <div class="min-w-0">
+              <p class="text-xs text-emerald-300/80 font-medium">Selamat Datang,</p>
+              <h2 class="text-lg sm:text-2xl font-bold truncate" id="custWelcome">Pelanggan Warung</h2>
+            </div>
+          </div>
+          <button onclick="loadCustomerData()" aria-label="Muat ulang data" class="shrink-0 w-9 h-9 sm:w-auto sm:h-auto px-0 sm:px-3.5 py-0 sm:py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold backdrop-blur-md border border-white/20 transition-all flex items-center justify-center sm:space-x-1">
+            <span class="material-icons-outlined text-sm">sync</span>
+            <span class="hidden sm:inline">Muat Ulang</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Ringkasan saldo: satu kartu, dua kolom yang selalu sebaris -->
+      <section class="bg-white rounded-2xl border border-slate-100 shadow-sm shadow-slate-200/40 overflow-hidden">
+        <div class="grid grid-cols-2 divide-x divide-slate-100">
+          <div class="p-4 sm:p-5 min-w-0">
+            <div class="flex items-center gap-2 text-rose-600">
+              <span class="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center shrink-0"><span class="material-icons-outlined text-lg">pending_actions</span></span>
+              <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wide leading-tight">Sisa Hutang Saya</span>
+            </div>
+            <h3 class="text-[clamp(0.78rem,4vw,1.5rem)] sm:text-2xl font-extrabold tabular-nums text-rose-600 tracking-tight leading-tight mt-3 whitespace-nowrap" id="custHutang">Rp0</h3>
+            <p class="text-[10px] sm:text-xs text-slate-400 mt-1 leading-relaxed">Tagihan kasbon belum lunas</p>
+          </div>
+          <div class="p-4 sm:p-5 min-w-0">
+            <div class="flex items-center gap-2 text-emerald-600">
+              <span class="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0"><span class="material-icons-outlined text-lg">account_balance</span></span>
+              <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wide leading-tight">Saldo Deposit</span>
+            </div>
+            <h3 class="text-[clamp(0.78rem,4vw,1.5rem)] sm:text-2xl font-extrabold tabular-nums text-emerald-600 tracking-tight leading-tight mt-3 whitespace-nowrap" id="custDeposit">Rp0</h3>
+            <p class="text-[10px] sm:text-xs text-slate-400 mt-1 leading-relaxed">Simpanan kembalian Anda</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Menu pelanggan: tidak mengubah kartu saldo maupun riwayat lama -->
+      <div>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Menu Saya</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button onclick="bukaModalCatatJajan()" class="group min-h-[88px] bg-white p-4 rounded-2xl border border-slate-100 shadow-sm shadow-slate-200/30 hover:-translate-y-0.5 hover:border-emerald-500 hover:shadow-md transition-all text-left flex items-center gap-4 active:scale-[.98]">
+            <span class="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <span class="material-icons-outlined text-2xl">add_shopping_cart</span>
+            </span>
+            <span>
+              <span class="block font-bold text-slate-800 text-sm group-hover:text-emerald-700">Catat Jajan</span>
+              <span class="block text-[11px] text-slate-400 mt-0.5">Pilih barang lalu kirim pengajuan</span>
+            </span>
+            <span class="material-icons-outlined ml-auto text-slate-300 group-hover:text-emerald-500 transition-colors">chevron_right</span>
+          </button>
+          <button onclick="bukaModalStatusPesanan()" class="group min-h-[88px] bg-white p-4 rounded-2xl border border-slate-100 shadow-sm shadow-slate-200/30 hover:-translate-y-0.5 hover:border-teal-500 hover:shadow-md transition-all text-left flex items-center gap-4 active:scale-[.98]">
+            <span class="w-11 h-11 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <span class="material-icons-outlined text-2xl">assignment_turned_in</span>
+            </span>
+            <span>
+              <span class="block font-bold text-slate-800 text-sm group-hover:text-teal-700">Status Pesanan</span>
+              <span class="block text-[11px] text-slate-400 mt-0.5">Lihat dan batalkan pengajuan Pending</span>
+            </span>
+            <span class="material-icons-outlined ml-auto text-slate-300 group-hover:text-teal-500 transition-colors">chevron_right</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Transaction History Card -->
+      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h3 class="font-bold text-slate-800 text-base flex items-center space-x-2">
+            <span class="material-icons-outlined text-emerald-600">history</span>
+            <span>Riwayat Transaksi Saya</span>
+          </h3>
+          <div class="flex items-center bg-slate-100 rounded-xl p-1 text-xs font-semibold self-start sm:self-auto">
+            <button onclick="loadCustomerData(30)" data-range="30" class="filter-riwayat-btn px-3 py-1.5 rounded-lg transition-all">30 Hari</button>
+            <button onclick="loadCustomerData(90)" data-range="90" class="filter-riwayat-btn px-3 py-1.5 rounded-lg transition-all">90 Hari</button>
+            <button onclick="loadCustomerData('semua')" data-range="semua" class="filter-riwayat-btn px-3 py-1.5 rounded-lg transition-all">Semua</button>
+          </div>
+        </div>
+
+        <div id="listRiwayatPelanggan" class="divide-y divide-slate-100">
+          <div class="p-8 text-center text-slate-400 text-xs">Memuat catatan transaksi Anda...</div>
+        </div>
+        <div id="infoRiwayatPelanggan" class="px-4 sm:px-5 py-3 text-[11px] text-slate-400 border-t border-slate-100 hidden"></div>
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ================= MODALS SECTION ================= -->
+
+  <!-- MODAL PENGATURAN AKUN PELANGGAN -->
+  <div id="modalPengaturanAkun" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden my-auto">
+      <div class="p-4 sm:p-5 bg-gradient-to-r from-emerald-700 to-teal-800 text-white flex items-start justify-between gap-3">
+        <div>
+          <p class="text-[11px] uppercase tracking-wider font-bold text-emerald-200">Akun Saya</p>
+          <h3 class="font-bold text-lg">Pengaturan Akun</h3>
+          <p class="text-xs text-emerald-100/80 mt-0.5">Ubah username atau password login Anda.</p>
+        </div>
+        <button onclick="tutupModal('modalPengaturanAkun')" class="w-8 h-8 rounded-lg hover:bg-white/15 flex items-center justify-center" aria-label="Tutup"><span class="material-icons-outlined">close</span></button>
+      </div>
+      <div class="p-4 sm:p-5 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-500 mb-1.5">Nama</label>
+          <input id="settingNamaPelanggan" type="text" readonly class="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-500 cursor-not-allowed">
+          <p class="text-[11px] text-slate-400 mt-1.5">Nama pelanggan dikelola oleh admin dan tidak dapat diubah di sini.</p>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 mb-1.5">Username</label>
+          <input id="settingUsernamePelanggan" type="text" autocomplete="username" maxlength="40" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 mb-1.5">Password Saat Ini</label>
+          <input id="settingPasswordLama" type="password" autocomplete="current-password" placeholder="Wajib diisi untuk menyimpan" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 mb-1.5">Password Baru <span class="font-medium text-slate-400">(opsional)</span></label>
+          <input id="settingPasswordBaru" type="password" autocomplete="new-password" minlength="4" maxlength="100" placeholder="Kosongkan jika tidak ingin mengubah" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 mb-1.5">Konfirmasi Password Baru</label>
+          <input id="settingKonfirmasiPassword" type="password" autocomplete="new-password" placeholder="Ulangi password baru" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white">
+        </div>
+
+        <!-- Menu Logout: dipindahkan ke sini dari header navbar agar header mobile
+             tidak padat/terpotong. Tetap terpisah jelas dari aksi Simpan. -->
+        <div class="border-t border-slate-100 pt-4">
+          <button type="button" onclick="logoutDariPengaturan()"
+            class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-600 text-sm font-bold transition-colors">
+            <span class="material-icons-outlined text-lg">logout</span>
+            <span>Keluar dari Akun</span>
+          </button>
+        </div>
+      </div>
+      <div class="p-4 sm:p-5 pt-0 flex gap-2">
+        <button onclick="tutupModal('modalPengaturanAkun')" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-bold transition-colors">Batal</button>
+        <button onclick="simpanPengaturanAkun()" class="flex-[1.25] py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition-colors flex items-center justify-center gap-1.5"><span class="material-icons-outlined text-lg">save</span>Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CATAT JAJAN PELANGGAN -->
+  <div id="modalCatatJajan" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden transform transition-all my-auto">
+      <div class="p-4 sm:p-5 bg-gradient-to-r from-emerald-700 to-teal-800 text-white flex items-start justify-between gap-3">
+        <div>
+          <p class="text-[11px] uppercase tracking-wider font-bold text-emerald-200">Pengajuan Pelanggan</p>
+          <h3 class="font-bold text-lg">Catat Jajan</h3>
+          <p class="text-xs text-emerald-100/80 mt-0.5">Pesanan akan dikirim untuk persetujuan admin.</p>
+        </div>
+        <button onclick="tutupModal('modalCatatJajan')" class="w-8 h-8 rounded-lg hover:bg-white/15 flex items-center justify-center" aria-label="Tutup">
+          <span class="material-icons-outlined">close</span>
+        </button>
+      </div>
+      <div class="p-4 sm:p-5 space-y-4">
+        <div class="relative">
+          <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+          <input type="text" id="cariProdukJajan" oninput="renderGridProdukJajan(this.value)" placeholder="Cari barang..." class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div id="gridProdukJajan" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-44 overflow-y-auto p-0.5">
+          <div class="col-span-2 sm:col-span-3 text-center text-slate-400 text-xs py-4">Memuat produk...</div>
+        </div>
+
+        <div class="border-t border-slate-100 pt-4">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5"><span class="material-icons-outlined text-emerald-600 text-lg">shopping_cart</span>Keranjang</h4>
+            <span id="jumlahItemJajan" class="text-[11px] font-bold text-slate-400">0 barang</span>
+          </div>
+          <div id="listKeranjangJajan" class="max-h-52 overflow-y-auto divide-y divide-slate-100 rounded-xl border border-slate-100"></div>
+        </div>
+        <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex items-center justify-between">
+          <span class="text-sm font-bold text-emerald-900">Total Pengajuan</span>
+          <span id="txtTotalJajan" class="text-lg font-black text-emerald-700">Rp0</span>
+        </div>
+      </div>
+      <div class="p-4 sm:p-5 pt-0 flex gap-2">
+        <button onclick="tutupModal('modalCatatJajan')" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-bold transition-colors">Nanti Saja</button>
+        <button onclick="kirimPengajuanJajan()" class="flex-[1.4] py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-sm transition-colors flex items-center justify-center gap-1.5"><span class="material-icons-outlined text-lg">send</span>Kirim Pengajuan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL STATUS PESANAN PELANGGAN -->
+  <div id="modalStatusPesanan" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden my-auto">
+      <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between gap-3 shrink-0">
+        <div>
+          <h3 class="font-bold text-lg text-slate-800">Status Pesanan</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Pengajuan terbaru ditampilkan paling atas.</p>
+        </div>
+        <button onclick="tutupModal('modalStatusPesanan')" class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-500 flex items-center justify-center" aria-label="Tutup"><span class="material-icons-outlined">close</span></button>
+      </div>
+      <div id="listStatusPesanan" class="p-3 sm:p-4 overflow-y-auto space-y-3 flex-1">
+        <div class="p-8 text-center text-slate-400 text-xs">Memuat pengajuan...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PENGAJUAN JAJAN ADMIN -->
+  <div id="modalPengajuanAdmin" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden my-auto">
+      <div class="p-4 sm:p-5 bg-gradient-to-r from-emerald-800 to-teal-900 text-white flex items-center justify-between gap-3 shrink-0">
+        <div>
+          <p class="text-[11px] uppercase tracking-wider font-bold text-emerald-200">Perlu Tindakan</p>
+          <h3 class="font-bold text-lg">Pengajuan Jajan</h3>
+        </div>
+        <button onclick="tutupModal('modalPengajuanAdmin')" class="w-8 h-8 rounded-lg hover:bg-white/15 flex items-center justify-center" aria-label="Tutup"><span class="material-icons-outlined">close</span></button>
+      </div>
+      <div id="listPengajuanAdmin" class="p-3 sm:p-4 overflow-y-auto space-y-3 flex-1">
+        <div class="p-8 text-center text-slate-400 text-xs">Memuat pengajuan...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CATAT HUTANG -->
+  <div id="modalTambahHutang" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden transform transition-all my-auto">
+      <div class="bg-emerald-700 p-4 text-white flex items-center justify-between">
+        <h3 class="font-bold text-base flex items-center space-x-2">
+          <span class="material-icons-outlined">add_shopping_cart</span>
+          <span>Catat Hutang Baru</span>
+        </h3>
+        <button onclick="tutupModal('modalTambahHutang')" class="text-white/80 hover:text-white"><span class="material-icons-outlined">close</span></button>
+      </div>
+      <div class="p-4 sm:p-6 space-y-4">
+        <!-- Picker Pelanggan Modern -->
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">👤 Pelanggan</label>
+          <button type="button" onclick="bukaPickerPelanggan('hutang')"
+            class="w-full flex items-center justify-between gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-left hover:border-emerald-400 hover:bg-white transition-all">
+            <span class="flex items-center gap-2 min-w-0">
+              <span class="material-icons-outlined text-slate-400 text-lg">search</span>
+              <span id="labelPelangganHutang" class="truncate text-slate-400">Cari atau pilih pelanggan</span>
+            </span>
+            <span class="material-icons-outlined text-slate-400 text-lg">expand_more</span>
+          </button>
+          <input type="hidden" id="selectPelangganHutang" value="">
+        </div>
+
+        <!-- Tanggal & Jam Transaksi (default sekarang, bisa diubah untuk backdate) -->
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">🕐 Tanggal &amp; Jam Transaksi</label>
+          <input type="datetime-local" id="waktuTransaksiHutang"
+            class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <p class="text-[10px] text-slate-400 mt-1">Default waktu sekarang. Ubah jika mencatat transaksi yang sudah lewat.</p>
+        </div>
+
+        <!-- Grid Produk: tap langsung masuk keranjang -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-bold text-slate-500 uppercase">Pilih Barang</label>
+            <div class="relative w-32 sm:w-44">
+              <span class="material-icons-outlined absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+              <input type="text" id="cariProdukHutang" oninput="renderGridProduk(this.value)" placeholder="Cari..."
+                class="w-full pl-7 pr-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+          </div>
+          <div id="gridProdukHutang" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-44 overflow-y-auto p-0.5">
+            <div class="col-span-2 sm:col-span-3 text-center text-slate-400 text-xs py-4">Memuat produk...</div>
+          </div>
+        </div>
+
+        <!-- Keranjang -->
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Keranjang</label>
+          <div class="border border-slate-200 rounded-xl max-h-48 overflow-y-auto overflow-x-auto">
+            <table class="w-full min-w-[420px] text-left text-xs">
+              <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-200 sticky top-0">
+                <tr>
+                  <th class="p-2.5">Barang</th>
+                  <th class="p-2.5">Harga</th>
+                  <th class="p-2.5 text-center">Qty</th>
+                  <th class="p-2.5 text-right">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody id="tblKeranjang" class="divide-y divide-slate-100">
+                <tr><td colspan="4" class="p-4 text-center text-slate-400">Keranjang masih kosong</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200">
+          <span class="text-xs font-bold text-slate-500 uppercase">Total Belanja:</span>
+          <span id="txtTotalBelanja" class="text-lg font-black text-rose-600">Rp0</span>
+        </div>
+
+        <!-- Catatan Admin (khusus Hutang) -->
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Catatan Admin (Opsional)</label>
+          <input type="text" id="catatanHutang" placeholder="Contoh: dicicil sebagian, catatan dari nota lama, dll."
+            class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+
+        <button onclick="prosesSimpanHutang()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-xl text-sm transition-all shadow-md active:scale-[0.98]">
+          Simpan Transaksi Hutang
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- MODAL TERIMA BAYAR -->
+  <div id="modalTerimaBayar" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all my-auto">
+      <div class="bg-blue-600 p-4 text-white flex items-center justify-between">
+        <h3 class="font-bold text-base flex items-center space-x-2">
+          <span class="material-icons-outlined">price_check</span>
+          <span>Terima Pembayaran</span>
+        </h3>
+        <button onclick="tutupModal('modalTerimaBayar')" class="text-white/80 hover:text-white"><span class="material-icons-outlined">close</span></button>
+      </div>
+      <div class="p-4 sm:p-6 space-y-4">
+        <!-- Picker Pelanggan Modern -->
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">👤 Pelanggan</label>
+          <button type="button" onclick="bukaPickerPelanggan('bayar')"
+            class="w-full flex items-center justify-between gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-left hover:border-blue-400 hover:bg-white transition-all">
+            <span class="flex items-center gap-2 min-w-0">
+              <span class="material-icons-outlined text-slate-400 text-lg">search</span>
+              <span id="labelPelangganBayar" class="truncate text-slate-400">Cari atau pilih pelanggan</span>
+            </span>
+            <span class="material-icons-outlined text-slate-400 text-lg">expand_more</span>
+          </button>
+          <input type="hidden" id="selectPelangganBayar" value="">
+        </div>
+
+        <!-- Tanggal & Jam Transaksi (default sekarang, bisa diubah untuk backdate) -->
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">🕐 Tanggal &amp; Jam Transaksi</label>
+          <input type="datetime-local" id="waktuTransaksiBayar"
+            class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <p class="text-[10px] text-slate-400 mt-1">Default waktu sekarang. Ubah jika mencatat transaksi yang sudah lewat.</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nominal Bayar (Rp)</label>
+          <input type="number" id="inputNominalBayar" placeholder="Contoh: 50000" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-lg font-bold text-slate-800 focus:ring-2 focus:ring-blue-500">
+          
+          <!-- Fast Nominal Chips -->
+          <div class="grid grid-cols-4 gap-1.5 mt-2">
+            <button type="button" onclick="setFastNominal(10000)" class="py-1 px-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-[11px] font-semibold text-slate-600">10rb</button>
+            <button type="button" onclick="setFastNominal(20000)" class="py-1 px-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-[11px] font-semibold text-slate-600">20rb</button>
+            <button type="button" onclick="setFastNominal(50000)" class="py-1 px-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-[11px] font-semibold text-slate-600">50rb</button>
+            <button type="button" onclick="setFastNominal(100000)" class="py-1 px-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-[11px] font-semibold text-slate-600">100rb</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Metode Pembayaran</label>
+          <select id="selectMetodeBayar" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+            <option value="Cash">Cash (Tunai)</option>
+            <option value="DANA">DANA / QRIS Digital</option>
+            <option value="Transfer Bank">Transfer Bank</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Keterangan (Opsional)</label>
+          <input type="text" id="inputKetBayar" placeholder="Catatan tambahan" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+        </div>
+
+        <button onclick="prosesSimpanBayar()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl text-sm transition-all shadow-md active:scale-[0.98]">
+          Simpan Pembayaran
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- MODAL PICKER PELANGGAN (bottom sheet, dipakai bersama oleh Catat Hutang & Terima Bayar) -->
+  <div id="modalPickerPelanggan" class="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm hidden items-end sm:items-center justify-center">
+    <div class="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-3xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] sheet-slide-up">
+      <div class="p-4 border-b border-slate-100 flex items-center justify-between shrink-0">
+        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+          <span class="material-icons-outlined text-emerald-600 text-lg">person_search</span>
+          <span>Pilih Pelanggan</span>
+        </h3>
+        <button onclick="tutupModal('modalPickerPelanggan')" class="text-slate-400 hover:text-slate-600"><span class="material-icons-outlined">close</span></button>
+      </div>
+      <div class="p-3 border-b border-slate-100 shrink-0">
+        <div class="relative">
+          <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+          <input type="text" id="cariPelangganPicker" oninput="renderPickerPelanggan(this.value)" placeholder="Cari pelanggan..."
+            class="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+      </div>
+      <div id="listPickerPelanggan" class="overflow-y-auto flex-1 py-1">
+        <div class="p-6 text-center text-slate-400 text-xs">Memuat data pelanggan...</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- MODAL DETAIL TRANSAKSI (bottom sheet, dipakai bersama oleh riwayat pelanggan & laporan admin) -->
+  <div id="modalDetailTransaksi" class="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm hidden items-end sm:items-center justify-center">
+    <div class="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] sheet-slide-up">
+      <div id="detailTransaksiHeader" class="p-4 text-white flex items-center justify-between shrink-0 bg-emerald-700">
+        <h3 class="font-bold text-base flex items-center gap-2">
+          <span class="material-icons-outlined" id="detailTransaksiIcon">receipt_long</span>
+          <span>Detail Transaksi</span>
+        </h3>
+        <button onclick="tutupModal('modalDetailTransaksi')" class="text-white/80 hover:text-white"><span class="material-icons-outlined">close</span></button>
+      </div>
+
+      <div class="p-5 space-y-4 overflow-y-auto">
+        <!-- Jenis & Status Badge -->
+        <div class="flex items-center justify-between">
+          <span id="detailTransaksiJenisBadge" class="px-2.5 py-1 rounded-lg text-xs font-bold"></span>
+          <span id="detailTransaksiStatusBadge" class="px-2.5 py-1 rounded-full text-[11px] font-bold"></span>
+        </div>
+
+        <!-- Nominal Utama -->
+        <div class="text-center py-1">
+          <p class="text-xs text-slate-400 font-semibold uppercase tracking-wide">Nominal</p>
+          <p id="detailTransaksiNominal" class="text-3xl font-black mt-0.5"></p>
+        </div>
+
+        <div class="border-t border-slate-100"></div>
+
+        <!-- Info Grid -->
+        <div class="space-y-3 text-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400 flex items-center gap-1.5"><span class="material-icons-outlined text-base">event</span>Tanggal</span>
+            <span id="detailTransaksiTanggal" class="font-bold text-slate-800"></span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400 flex items-center gap-1.5"><span class="material-icons-outlined text-base">schedule</span>Jam</span>
+            <span id="detailTransaksiJam" class="font-bold text-slate-800"></span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400 flex items-center gap-1.5"><span class="material-icons-outlined text-base">person</span>Pelanggan</span>
+            <span id="detailTransaksiNama" class="font-bold text-slate-800 truncate max-w-[60%] text-right"></span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400 flex items-center gap-1.5"><span class="material-icons-outlined text-base">badge</span>Admin Input</span>
+            <span id="detailTransaksiAdmin" class="font-bold text-slate-800 truncate max-w-[60%] text-right"></span>
+          </div>
+          <div id="rowDetailMetode" class="flex items-center justify-between">
+            <span class="text-slate-400 flex items-center gap-1.5"><span class="material-icons-outlined text-base">credit_card</span>Metode Pembayaran</span>
+            <span id="detailTransaksiMetode" class="font-bold text-slate-800"></span>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-100"></div>
+
+        <!-- Detail Barang / Keterangan -->
+        <div>
+          <p class="text-xs font-bold text-slate-400 uppercase mb-1">Detail</p>
+          <p id="detailTransaksiDetail" class="text-sm text-slate-700 bg-slate-50 rounded-xl p-3 leading-relaxed"></p>
+        </div>
+
+        <!-- Catatan Admin -->
+        <div id="blokCatatanAdmin">
+          <p class="text-xs font-bold text-slate-400 uppercase mb-1">Catatan Admin</p>
+          <p id="detailTransaksiCatatan" class="text-sm text-slate-700 bg-amber-50 border border-amber-100 rounded-xl p-3 leading-relaxed"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- MODAL PELANGGAN -->
+  <div id="modalPelanggan" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all my-auto">
+      <div class="bg-amber-600 p-4 text-white flex items-center justify-between">
+        <h3 class="font-bold text-base flex items-center space-x-2">
+          <span class="material-icons-outlined">people_alt</span>
+          <span>Kelola Data Pelanggan</span>
+        </h3>
+        <button onclick="tutupModal('modalPelanggan')" class="text-white/80 hover:text-white"><span class="material-icons-outlined">close</span></button>
+      </div>
+      <div class="p-4 sm:p-6 space-y-4">
+        <!-- Form Tambah -->
+        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
+          <span class="text-xs font-bold text-slate-500 uppercase">Tambah Pelanggan Baru</span>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <input type="text" id="addNamaP" placeholder="Nama Lengkap" class="p-2 bg-white border border-slate-200 rounded-lg text-xs">
+            <input type="text" id="addUsernameP" placeholder="Username" class="p-2 bg-white border border-slate-200 rounded-lg text-xs">
+            <input type="text" id="addPasswordP" placeholder="Password" class="p-2 bg-white border border-slate-200 rounded-lg text-xs">
+          </div>
+          <button onclick="prosesTambahPelanggan()" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-xs transition-all">
+            + Tambah Pelanggan
+          </button>
+        </div>
+
+        <!-- Tabel List -->
+        <div class="border border-slate-200 rounded-xl max-h-60 overflow-y-auto overflow-x-auto">
+          <table class="w-full min-w-[420px] text-left text-xs">
+            <thead class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200">
+              <tr>
+                <th class="p-2.5">Nama</th>
+                <th class="p-2.5">Username</th>
+                <th class="p-2.5">Hutang</th>
+                <th class="p-2.5 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tblPelanggan" class="divide-y divide-slate-100">
+              <tr><td colspan="4" class="p-4 text-center text-slate-400">Memuat data pelanggan...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- MODAL PRODUK -->
+  <div id="modalProduk" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all my-auto">
+      <div class="bg-purple-700 p-4 text-white flex items-center justify-between">
+        <h3 class="font-bold text-base flex items-center space-x-2">
+          <span class="material-icons-outlined">inventory_2</span>
+          <span>Katalog Produk Warung</span>
+        </h3>
+        <button onclick="tutupModal('modalProduk')" class="text-white/80 hover:text-white"><span class="material-icons-outlined">close</span></button>
+      </div>
+      <div class="p-4 sm:p-6 space-y-4">
+        <!-- Form Tambah Produk -->
+        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
+          <span class="text-xs font-bold text-slate-500 uppercase">Tambah Barang Baru</span>
+          <div class="grid grid-cols-12 gap-2">
+            <input type="text" id="addNamaPrd" placeholder="Nama Barang" class="col-span-7 p-2 bg-white border border-slate-200 rounded-lg text-xs">
+            <input type="number" id="addHargaPrd" placeholder="Harga Rp" class="col-span-5 p-2 bg-white border border-slate-200 rounded-lg text-xs">
+          </div>
+          <button onclick="prosesTambahProduk()" class="w-full py-2 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-lg text-xs transition-all">
+            + Tambah Produk
+          </button>
+        </div>
+
+        <!-- Tabel Produk -->
+        <div class="border border-slate-200 rounded-xl max-h-60 overflow-y-auto overflow-x-auto">
+          <table class="w-full min-w-[360px] text-left text-xs">
+            <thead class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200">
+              <tr>
+                <th class="p-2.5">Nama Produk</th>
+                <th class="p-2.5">Harga</th>
+                <th class="p-2.5 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tblProduk" class="divide-y divide-slate-100">
+              <tr><td colspan="3" class="p-4 text-center text-slate-400">Memuat data barang...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- MODAL LAPORAN -->
+  <div id="modalLaporan" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden transform transition-all my-auto max-h-[90vh] flex flex-col">
+      <div class="bg-teal-700 p-4 text-white flex items-center justify-between shrink-0">
+        <h3 class="font-bold text-base flex items-center space-x-2">
+          <span class="material-icons-outlined">analytics</span>
+          <span>Laporan Seluruh Transaksi</span>
+        </h3>
+        <button onclick="tutupModal('modalLaporan')" class="text-white/80 hover:text-white"><span class="material-icons-outlined">close</span></button>
+      </div>
+      <div class="p-4 sm:p-6 overflow-y-auto flex-1 space-y-3">
+        <div class="border border-slate-200 rounded-xl overflow-x-auto">
+          <table class="w-full min-w-[600px] text-left text-xs">
+            <thead class="bg-slate-800 text-slate-200 font-bold">
+              <tr>
+                <th class="p-3">Tanggal</th>
+                <th class="p-3">Pelanggan</th>
+                <th class="p-3">Jenis</th>
+                <th class="p-3 text-right">Total Belanja</th>
+                <th class="p-3 text-right">Bayar</th>
+                <th class="p-3 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody id="tblLaporan" class="divide-y divide-slate-100">
+              <tr><td colspan="6" class="p-6 text-center text-slate-400">Memuat rekap transaksi...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script src="script.js"></script>
+</body>
+</html>
