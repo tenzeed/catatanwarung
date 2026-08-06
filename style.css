@@ -20,7 +20,11 @@
        Baris berikut memaksa ruang scrollbar SELALU dicadangkan, baik
        konten butuh discroll atau tidak, sehingga lebar viewport (dan
        posisi header) selalu konsisten di semua kondisi. */
-    html { overflow-y: scroll; scrollbar-gutter: stable; }
+    html { overflow-y: auto; scrollbar-gutter: auto; }
+
+    @media (min-width: 768px) {
+      html { scrollbar-gutter: stable; }
+    }
 
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     img, table { max-width: 100%; }
@@ -63,6 +67,13 @@
        diberikan skrip, elemen ini TETAP tidak akan tampil di layar < 768px. */
     @media (max-width: 767px) {
       #userInfoHeader { display: none !important; }
+
+      /* Mencegah Chrome Android memperbesar halaman saat input login difokuskan. */
+      #viewLogin input,
+      #viewLogin select,
+      #viewLogin textarea {
+        font-size: 16px !important;
+      }
     }
 
     /* ======================================================================
