@@ -20,7 +20,7 @@
        Baris berikut memaksa ruang scrollbar SELALU dicadangkan, baik
        konten butuh discroll atau tidak, sehingga lebar viewport (dan
        posisi header) selalu konsisten di semua kondisi. */
-    html { scrollbar-gutter: stable; }
+   html { overflow-y: scroll; scrollbar-gutter: stable; }
 
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     img, table { max-width: 100%; }
