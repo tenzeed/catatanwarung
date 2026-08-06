@@ -7,6 +7,21 @@
 /* Pengaman anti horizontal-scroll: apapun penyebabnya, body tidak akan
        pernah lebih lebar dari viewport perangkat (HP/tablet/PC). */
     html, body { max-width: 100%; overflow-x: hidden; }
+
+    /* Pengaman anti "header bergeser": beberapa browser mobile (terutama
+       WebView in-app seperti browser bawaan Facebook) memakai scrollbar
+       vertikal yang MEMAKAN ruang layout (bukan overlay tak-terlihat
+       seperti Safari/Chrome modern). Scrollbar itu hanya muncul saat
+       halaman butuh discroll — mis. dashboard Admin yang panjang (selalu
+       butuh scroll -> selalu ada scrollbar -> header "tertarik" ke kiri
+       sedikit terus-menerus), atau halaman Login saat keyboard muncul
+       (input yang fokus didorong ke atas sehingga sesaat halaman jadi
+       butuh discroll -> scrollbar muncul -> header ikut bergeser).
+       Baris berikut memaksa ruang scrollbar SELALU dicadangkan, baik
+       konten butuh discroll atau tidak, sehingga lebar viewport (dan
+       posisi header) selalu konsisten di semua kondisi. */
+    html { overflow-y: scroll; scrollbar-gutter: stable; }
+
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     img, table { max-width: 100%; }
     .view-section { display: none; }
