@@ -8,35 +8,28 @@
        pernah lebih lebar dari viewport perangkat (HP/tablet/PC). */
     html, body { max-width: 100%; overflow-x: hidden; }
 
-    /* Pengaman anti "header bergeser": beberapa browser mobile (terutama
-       WebView in-app seperti browser bawaan Facebook) memakai scrollbar
-       vertikal yang MEMAKAN ruang layout (bukan overlay tak-terlihat
-       seperti Safari/Chrome modern). Scrollbar itu hanya muncul saat
-       halaman butuh discroll — mis. dashboard Admin yang panjang (selalu
-       butuh scroll -> selalu ada scrollbar -> header "tertarik" ke kiri
-       sedikit terus-menerus), atau halaman Login saat keyboard muncul
-       (input yang fokus didorong ke atas sehingga sesaat halaman jadi
-       butuh discroll -> scrollbar muncul -> header ikut bergeser).
-       Baris berikut memaksa ruang scrollbar SELALU dicadangkan, baik
-       konten butuh discroll atau tidak, sehingga lebar viewport (dan
-       posisi header) selalu konsisten di semua kondisi. */
-    html { overflow-y: scroll; scrollbar-gutter: stable; }
-
-    /* Perluasan fix di atas: <html> hanyalah SATU dari banyak container yang
-       bisa discroll di app ini. Setiap modal (backdrop-nya) dan setiap daftar
-       di dalam modal (produk, pelanggan, riwayat, pengajuan, dst.) punya
-       overflow-y-auto sendiri-sendiri. Kalau salah satu dari mereka berubah
-       dari "tidak butuh scroll" -> "butuh scroll" (mis. saat keyboard
-       terbuka membuat modal Pengaturan Akun jadi lebih tinggi dari layar),
-       scrollbar-nya bisa muncul dan menggeser kontennya sendiri beberapa
-       pixel — pola yang sama seperti fix <html> di atas, hanya beda lokasi.
-       Selector ini menangkap SEMUA elemen yang memakai utility Tailwind
-       "overflow-y-auto" / "overflow-auto" di seluruh halaman sekaligus,
-       termasuk modal-modal yang mungkin ditambahkan nanti. */
+    /* Pengaman anti "sisi kanan bergeser/tidak full": daripada mencadangkan
+       ruang scrollbar (yang tadinya saya coba, tapi hasilnya malah bikin
+       layar TIDAK PERNAH full lagi), pendekatan yang benar adalah HILANGKAN
+       scrollbar-nya sama sekali dari perhitungan lebar layout -- di SEMUA
+       elemen yang bisa discroll (<html> dan semua modal/daftar dengan
+       overflow-y-auto). Konten tetap 100% bisa discroll normal (jari,
+       mouse wheel, keyboard); yang dihilangkan cuma indikator visual +
+       ruang yang biasa dia makan. Dengan begini lebar layar SELALU penuh
+       dan SELALU konsisten, baik konten pendek maupun panjang. */
+    html, body,
     [class*="overflow-y-auto"],
     [class*="overflow-auto"] {
-      overflow-y: scroll !important;
-      scrollbar-gutter: stable;
+      scrollbar-width: none;      /* Firefox */
+      -ms-overflow-style: none;   /* IE / Edge lama */
+    }
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar,
+    [class*="overflow-y-auto"]::-webkit-scrollbar,
+    [class*="overflow-auto"]::-webkit-scrollbar {
+      display: none;              /* Chrome / Safari / Edge modern */
+      width: 0;
+      height: 0;
     }
 
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -47,15 +40,6 @@
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    /* Custom Scrollbar */
-    /* Scrollbar dibuat TAK TERLIHAT (transparan), bukan dihilangkan.
-       Ruangnya tetap ada/dicadangkan (supaya lebar layar tidak pernah
-       berubah -> tidak ada lagi efek "geser"), tapi tidak digambar sama
-       sekali secara visual. Scroll tetap berfungsi normal seperti biasa. */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: transparent; }
-    ::-webkit-scrollbar-thumb:hover { background: transparent; }
 
     /* Filter rentang riwayat transaksi pelanggan */
     .filter-riwayat-btn { color: #64748b; }
