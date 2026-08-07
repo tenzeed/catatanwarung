@@ -20,7 +20,23 @@
        Baris berikut memaksa ruang scrollbar SELALU dicadangkan, baik
        konten butuh discroll atau tidak, sehingga lebar viewport (dan
        posisi header) selalu konsisten di semua kondisi. */
-   html { overflow-y: scroll; scrollbar-gutter: stable; }
+    html { overflow-y: scroll; scrollbar-gutter: stable; }
+
+    /* Perluasan fix di atas: <html> hanyalah SATU dari banyak container yang
+       bisa discroll di app ini. Setiap modal (backdrop-nya) dan setiap daftar
+       di dalam modal (produk, pelanggan, riwayat, pengajuan, dst.) punya
+       overflow-y-auto sendiri-sendiri. Kalau salah satu dari mereka berubah
+       dari "tidak butuh scroll" -> "butuh scroll" (mis. saat keyboard
+       terbuka membuat modal Pengaturan Akun jadi lebih tinggi dari layar),
+       scrollbar-nya bisa muncul dan menggeser kontennya sendiri beberapa
+       pixel — pola yang sama seperti fix <html> di atas, hanya beda lokasi.
+       Selector ini menangkap SEMUA elemen yang memakai utility Tailwind
+       "overflow-y-auto" / "overflow-auto" di seluruh halaman sekaligus,
+       termasuk modal-modal yang mungkin ditambahkan nanti. */
+    [class*="overflow-y-auto"],
+    [class*="overflow-auto"] {
+      scrollbar-gutter: stable;
+    }
 
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     img, table { max-width: 100%; }
