@@ -35,6 +35,7 @@
        termasuk modal-modal yang mungkin ditambahkan nanti. */
     [class*="overflow-y-auto"],
     [class*="overflow-auto"] {
+      overflow-y: scroll !important;
       scrollbar-gutter: stable;
     }
 
