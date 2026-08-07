@@ -2,8 +2,8 @@
 <html lang="id" class="h-full bg-slate-50">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Warung Ujung Wetan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=overlays-content">
+  <title>Catatan Warung Pro</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -54,7 +54,7 @@
         </div>
         <div class="min-w-0">
           <h1 class="font-bold text-base sm:text-lg leading-tight tracking-wide truncate">Catatan Warung</h1>
-          <p class="text-[10px] sm:text-[11px] text-emerald-200/80 font-medium truncate hidden min-[380px]:block">Cek Dewek Gah Bisa</p>
+          <p class="text-[10px] sm:text-[11px] text-emerald-200/80 font-medium truncate hidden min-[380px]:block">Sistem Keuangan Modern</p>
         </div>
       </div>
 
@@ -553,7 +553,7 @@
       <div class="p-4 sm:p-6 space-y-4">
         <!-- Picker Pelanggan Modern -->
         <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">?? Pelanggan</label>
+          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">👤 Pelanggan</label>
           <button type="button" onclick="bukaPickerPelanggan('hutang')"
             class="w-full flex items-center justify-between gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-left hover:border-emerald-400 hover:bg-white transition-all">
             <span class="flex items-center gap-2 min-w-0">
@@ -567,7 +567,7 @@
 
         <!-- Tanggal & Jam Transaksi (default sekarang, bisa diubah untuk backdate) -->
         <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">?? Tanggal &amp; Jam Transaksi</label>
+          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">🕐 Tanggal &amp; Jam Transaksi</label>
           <input type="datetime-local" id="waktuTransaksiHutang"
             class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
           <p class="text-[10px] text-slate-400 mt-1">Default waktu sekarang. Ubah jika mencatat transaksi yang sudah lewat.</p>
@@ -641,7 +641,7 @@
       <div class="p-4 sm:p-6 space-y-4">
         <!-- Picker Pelanggan Modern -->
         <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">?? Pelanggan</label>
+          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">👤 Pelanggan</label>
           <button type="button" onclick="bukaPickerPelanggan('bayar')"
             class="w-full flex items-center justify-between gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-left hover:border-blue-400 hover:bg-white transition-all">
             <span class="flex items-center gap-2 min-w-0">
@@ -655,7 +655,7 @@
 
         <!-- Tanggal & Jam Transaksi (default sekarang, bisa diubah untuk backdate) -->
         <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">?? Tanggal &amp; Jam Transaksi</label>
+          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">🕐 Tanggal &amp; Jam Transaksi</label>
           <input type="datetime-local" id="waktuTransaksiBayar"
             class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
           <p class="text-[10px] text-slate-400 mt-1">Default waktu sekarang. Ubah jika mencatat transaksi yang sudah lewat.</p>
