@@ -48,10 +48,14 @@
       to { opacity: 1; transform: translateY(0); }
     }
     /* Custom Scrollbar */
+    /* Scrollbar dibuat TAK TERLIHAT (transparan), bukan dihilangkan.
+       Ruangnya tetap ada/dicadangkan (supaya lebar layar tidak pernah
+       berubah -> tidak ada lagi efek "geser"), tapi tidak digambar sama
+       sekali secara visual. Scroll tetap berfungsi normal seperti biasa. */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #f1f5f9; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: transparent; }
+    ::-webkit-scrollbar-thumb:hover { background: transparent; }
 
     /* Filter rentang riwayat transaksi pelanggan */
     .filter-riwayat-btn { color: #64748b; }
