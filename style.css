@@ -57,6 +57,32 @@
     .produk-card:active, .qty-btn:active { transform: scale(0.94); }
 
     /* ======================================================================
+       SKELETON LOADER — pengganti teks "Memuat..." di seluruh app.
+       Dipakai lewat class .skeleton + ukuran (h-*, w-*, rounded-*) dari
+       Tailwind. Animasinya geser gradient terang dari kiri ke kanan
+       (efek "shimmer"), bukan cuma blok abu-abu diam.
+       ====================================================================== */
+    .skeleton {
+      background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 37%, #e2e8f0 63%);
+      background-size: 400% 100%;
+      animation: skeletonShimmer 1.4s ease infinite;
+    }
+    @keyframes skeletonShimmer {
+      0% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .skeleton { animation: none; background: #e2e8f0; }
+    }
+
+    /* Banner ajakan instal PWA: turun halus dari atas saat muncul */
+    @keyframes bannerSlideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    #pwaInstallBanner.pwa-banner-show { animation: bannerSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+
+    /* ======================================================================
        HEADER: NAVBAR RESPONSIVE FIX (Mobile)
        ======================================================================
        #userInfoHeader (ikon status bulat hijau + nama/role) sengaja HANYA
