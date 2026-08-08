@@ -91,21 +91,24 @@
        bukan yang sudah pakai app terpasang) dan HANYA sebelum login. Begitu
        berhasil login, banner ini otomatis disembunyikan (lihat setupDashboard
        di script.js). Bisa ditutup manual juga lewat tombol X. -->
-  <div id="pwaInstallBanner" class="hidden bg-emerald-50 border-b border-emerald-100">
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center shrink-0">
-        <span class="material-icons-outlined text-white text-xl">get_app</span>
-      </div>
-      <div class="min-w-0 flex-1">
-        <p class="text-xs font-bold text-emerald-900 truncate">Pasang Catatan Warung di HP Anda</p>
-        <p class="text-[11px] text-emerald-700/80 truncate">Buka lebih cepat, langsung dari layar utama</p>
-      </div>
-      <button onclick="pwaInstallClick()" class="shrink-0 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors active:scale-95">Instal</button>
-      <button onclick="pwaDismissBanner()" aria-label="Tutup" class="shrink-0 w-7 h-7 rounded-lg hover:bg-emerald-100 flex items-center justify-center text-emerald-700 transition-colors">
-        <span class="material-icons-outlined text-lg">close</span>
-      </button>
+ <div class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-emerald-700 to-emerald-600">
+  <div class="flex items-center gap-3">
+    <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+      <span class="material-icons-outlined text-white">storefront</span>
+    </div>
+    <div>
+      <p class="font-bold text-white">Catatan Warung</p>
+      <p class="text-xs text-emerald-100">Sistem Keuangan Modern</p>
     </div>
   </div>
+
+  <button id="pwaInstallBtn" onclick="pwaInstallClick()" 
+    class="hidden shrink-0 w-10 h-10 rounded-xl bg-white/15 hover:bg-white/25 
+           flex items-center justify-center text-white transition-colors active:scale-95"
+    aria-label="Instal Aplikasi" title="Instal ke HP">
+    <span class="material-icons-outlined text-xl">install_mobile</span>
+  </button>
+</div>
 
   <!-- MAIN CONTAINER -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
