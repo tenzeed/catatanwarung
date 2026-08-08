@@ -146,7 +146,7 @@ function showView(viewId) {
 
   // Banner ajakan instal PWA HANYA relevan di layar Login (sebelum masuk).
   if (isLogin) {
-    maybeShowPwaBanner();
+    maybeShowPwaInstallBtn());
   } else {
     hidePwaBanner();
   }
