@@ -3,7 +3,7 @@
 // ==========================================================================
 // Ganti dengan URL Web App hasil deploy Google Apps Script Anda, contoh:
 // "https://script.google.com/macros/s/AKfycbXXXXXXXXXXXXXXXXXXXXXX/exec"
-const API_URL = "YOUR_APPS_SCRIPT_URL";
+const API_URL = "https://script.google.com/macros/s/AKfycbypIG48h8o5NMLPJmOjcO46FAGx9-J2OdCCMBeFPzgjqL7zfbAwkhysvHDG0Xm1unuj/exec";
 
 // --- HELPER FETCH TERPUSAT KE APPS SCRIPT REST API ---
 // Catatan penting soal CORS:
