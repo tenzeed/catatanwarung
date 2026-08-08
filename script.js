@@ -3,7 +3,7 @@
 // ==========================================================================
 // Ganti dengan URL Web App hasil deploy Google Apps Script Anda, contoh:
 // "https://script.google.com/macros/s/AKfycbXXXXXXXXXXXXXXXXXXXXXX/exec"
-const API_URL = "https://script.google.com/macros/s/AKfycbypIG48h8o5NMLPJmOjcO46FAGx9-J2OdCCMBeFPzgjqL7zfbAwkhysvHDG0Xm1unuj/exec";
+const API_URL = "YOUR_APPS_SCRIPT_URL";
 
 // --- HELPER FETCH TERPUSAT KE APPS SCRIPT REST API ---
 // Catatan penting soal CORS:
@@ -146,7 +146,7 @@ function showView(viewId) {
 
   // Banner ajakan instal PWA HANYA relevan di layar Login (sebelum masuk).
   if (isLogin) {
-    maybeShowPwaInstallBtn());
+    maybeShowPwaBanner();
   } else {
     hidePwaBanner();
   }
@@ -319,10 +319,12 @@ function togglePasswordVisibility(inputId, btnEl) {
 // sudah login (lihat showView).
 // ==========================================================================
 let pwaDeferredPrompt = null;
+const PWA_DISMISS_KEY = 'warungPwaBannerDitutup';
 
 function isRunningStandalone() {
   return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
+
 function isAndroidBrowser() {
   return /Android/i.test(navigator.userAgent || '');
 }
@@ -330,24 +332,31 @@ function isAndroidBrowser() {
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   pwaDeferredPrompt = e;
-  maybeShowPwaInstallBtn();
+  maybeShowPwaBanner();
 });
 
 window.addEventListener('appinstalled', () => {
   pwaDeferredPrompt = null;
-  hidePwaInstallBtn();
+  hidePwaBanner();
 });
 
-function maybeShowPwaInstallBtn() {
-  const btn = document.getElementById('pwaInstallBtn');
-  if (!btn) return;
-  const bolehTampil = !!pwaDeferredPrompt && isAndroidBrowser() && !isRunningStandalone() && !currentUser;
-  btn.classList.toggle('hidden', !bolehTampil);
+function maybeShowPwaBanner() {
+  const banner = document.getElementById('pwaInstallBanner');
+  if (!banner) return;
+  const sudahDitutup = localStorage.getItem(PWA_DISMISS_KEY) === '1';
+  const bolehTampil = !!pwaDeferredPrompt && isAndroidBrowser() && !isRunningStandalone() && !sudahDitutup && !currentUser;
+  banner.classList.toggle('hidden', !bolehTampil);
+  if (bolehTampil) banner.classList.add('pwa-banner-show');
 }
 
-function hidePwaInstallBtn() {
-  const btn = document.getElementById('pwaInstallBtn');
-  if (btn) btn.classList.add('hidden');
+function hidePwaBanner() {
+  const banner = document.getElementById('pwaInstallBanner');
+  if (banner) banner.classList.add('hidden');
+}
+
+function pwaDismissBanner() {
+  localStorage.setItem(PWA_DISMISS_KEY, '1');
+  hidePwaBanner();
 }
 
 function pwaInstallClick() {
@@ -355,7 +364,7 @@ function pwaInstallClick() {
   pwaDeferredPrompt.prompt();
   pwaDeferredPrompt.userChoice.finally(() => {
     pwaDeferredPrompt = null;
-    hidePwaInstallBtn();
+    hidePwaBanner();
   });
 }
 
