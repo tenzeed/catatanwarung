@@ -3,7 +3,7 @@
 // ==========================================================================
 // Ganti dengan URL Web App hasil deploy Google Apps Script Anda, contoh:
 // "https://script.google.com/macros/s/AKfycbXXXXXXXXXXXXXXXXXXXXXX/exec"
-const API_URL = '/api/apps-script';
+const API_URL = "YOUR_APPS_SCRIPT_URL";
 
 // --- HELPER FETCH TERPUSAT KE APPS SCRIPT REST API ---
 // Catatan penting soal CORS:
@@ -15,11 +15,11 @@ const API_URL = '/api/apps-script';
 // "simple request" dan tidak memicu preflight. Di sisi server (Code.gs),
 // body ini tetap di-parse sebagai JSON secara manual dari e.postData.contents.
 async function apiRequest(action, { method = 'GET', params = {}, body = null } = {}) {
-  if (!API_URL || API_URL === 'https://script.google.com/macros/s/AKfycbypIG48h8o5NMLPJmOjcO46FAGx9-J2OdCCMBeFPzgjqL7zfbAwkhysvHDG0Xm1unuj/exec') {
+  if (!API_URL || API_URL === 'YOUR_APPS_SCRIPT_URL') {
     throw new Error('API_URL belum diatur. Isi API_URL di script.js dengan URL Web App Apps Script Anda.');
   }
 
-  const url = new URL(API_URL, window.location.origin);
+  const url = new URL(API_URL);
   url.searchParams.set('action', action);
   Object.keys(params).forEach(key => {
     if (params[key] !== undefined && params[key] !== null) {
@@ -143,6 +143,13 @@ function showView(viewId) {
   if (currentUser) {
     document.getElementById('txtUserRole').innerText = `${currentUser.nama} (${currentUser.role})`;
   }
+
+  // Banner ajakan instal PWA HANYA relevan di layar Login (sebelum masuk).
+  if (isLogin) {
+    maybeShowPwaBanner();
+  } else {
+    hidePwaBanner();
+  }
 }
 
 function bukaModal(id) {
@@ -169,6 +176,205 @@ function escapeHTML(value) {
   return String(value == null ? '' : value)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+// ==========================================================================
+// SKELETON LOADER — pengganti teks "Memuat..." di seluruh app. Setiap fungsi
+// di bawah menghasilkan blok placeholder abu-abu (shimmer, lihat style.css)
+// yang bentuknya mengikuti konten asli (baris tabel / kartu list / grid
+// produk / baris picker), supaya transisi ke data asli terasa mulus dan
+// tidak "meloncat" bentuknya.
+// ==========================================================================
+
+function skeletonTableRows(colWidths, count) {
+  let html = '';
+  for (let i = 0; i < count; i++) {
+    html += '<tr>' + colWidths.map(w =>
+      `<td class="py-3 px-4"><div class="skeleton h-3.5 rounded" style="width:${w}"></div></td>`
+    ).join('') + '</tr>';
+  }
+  return html;
+}
+
+function skeletonListCards(count) {
+  let html = '';
+  for (let i = 0; i < count; i++) {
+    html += `
+      <div class="p-4 flex items-start justify-between gap-3">
+        <div class="space-y-2 flex-1 min-w-0">
+          <div class="skeleton h-3 rounded" style="width:35%"></div>
+          <div class="skeleton h-4 rounded" style="width:65%"></div>
+        </div>
+        <div class="skeleton h-5 rounded shrink-0" style="width:64px"></div>
+      </div>`;
+  }
+  return html;
+}
+
+function skeletonArticleCards(count) {
+  let html = '';
+  for (let i = 0; i < count; i++) {
+    html += `
+      <article class="border border-slate-100 rounded-2xl p-3.5 sm:p-4">
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div class="space-y-2">
+            <div class="skeleton h-3 rounded" style="width:120px"></div>
+            <div class="skeleton h-2.5 rounded" style="width:80px"></div>
+          </div>
+          <div class="skeleton h-5 rounded-full" style="width:70px"></div>
+        </div>
+        <div class="skeleton h-12 rounded-xl"></div>
+      </article>`;
+  }
+  return html;
+}
+
+function skeletonGridCards(count) {
+  let html = '';
+  for (let i = 0; i < count; i++) {
+    html += `
+      <div class="p-2.5 border border-slate-200 rounded-xl">
+        <div class="skeleton h-3 rounded mb-2" style="width:85%"></div>
+        <div class="skeleton h-3 rounded" style="width:45%"></div>
+      </div>`;
+  }
+  return html;
+}
+
+function skeletonPickerRows(count) {
+  let html = '';
+  for (let i = 0; i < count; i++) {
+    html += `
+      <div class="w-full flex items-center gap-2.5 px-4 py-2.5">
+        <div class="skeleton w-8 h-8 rounded-full shrink-0"></div>
+        <div class="skeleton h-3.5 rounded flex-1" style="max-width:140px"></div>
+      </div>`;
+  }
+  return html;
+}
+
+// ==========================================================================
+// ANIMASI ANGKA KPI — dari nilai yang sedang tampil ke nilai baru, halus
+// (easing ease-out), dipakai untuk 4 kartu KPI dashboard Admin dan saldo
+// dashboard Pelanggan. Menyimpan nilai terakhir per elemen supaya refresh
+// berikutnya menghitung dari angka SEBELUMNYA (bukan selalu dari 0).
+// ==========================================================================
+const _kpiAnimState = {};
+const _kpiAnimToken = {};
+
+function animateKpiValue(elId, targetValue, opts) {
+  opts = opts || {};
+  const isCurrency = opts.isCurrency !== false;
+  const duration = opts.duration || 900;
+  const el = document.getElementById(elId);
+  if (!el) return;
+
+  targetValue = Number(targetValue) || 0;
+  const startValue = _kpiAnimState[elId] || 0;
+  const change = targetValue - startValue;
+  const startTime = performance.now();
+
+  // Token unik per pemanggilan: kalau ada animasi BARU dimulai untuk elemen
+  // yang sama sebelum animasi LAMA selesai (mis. tombol Segarkan diklik
+  // dobel cepat), animasi lama otomatis berhenti nulis begitu tokennya
+  // sudah tidak cocok lagi — supaya tidak ada dua animasi rebutan menulis
+  // ke elemen yang sama di frame yang sama (bikin angka kedip/lompat).
+  const myToken = Symbol();
+  _kpiAnimToken[elId] = myToken;
+
+  function easeOutExpo(t) {
+    return t >= 1 ? 1 : 1 - Math.pow(2, -10 * t);
+  }
+
+  function step(now) {
+    if (_kpiAnimToken[elId] !== myToken) return; // sudah digantikan animasi yang lebih baru
+    const t = Math.min((now - startTime) / duration, 1);
+    const current = Math.round(startValue + change * easeOutExpo(t));
+    el.innerText = isCurrency ? formatRp(current) : new Intl.NumberFormat('id-ID').format(current);
+    if (t < 1) {
+      requestAnimationFrame(step);
+    } else {
+      _kpiAnimState[elId] = targetValue;
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+// --- TOGGLE TAMPILKAN/SEMBUNYIKAN PASSWORD ---
+function togglePasswordVisibility(inputId, btnEl) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const icon = btnEl.querySelector('span');
+  const willShow = input.type === 'password';
+  input.type = willShow ? 'text' : 'password';
+  if (icon) icon.innerText = willShow ? 'visibility' : 'visibility_off';
+}
+
+// ==========================================================================
+// PWA: AJAKAN INSTAL APLIKASI (khusus Android + browser biasa)
+// Tidak tampil untuk: iOS/desktop (banner Android khusus), yang sudah pakai
+// versi terpasang (baik lewat PWA maupun APK Kodular — dua-duanya tidak
+// akan pernah memicu event beforeinstallprompt), yang sudah menutup manual
+// sebelumnya (disimpan di localStorage), dan SELALU disembunyikan begitu
+// sudah login (lihat showView).
+// ==========================================================================
+let pwaDeferredPrompt = null;
+const PWA_DISMISS_KEY = 'warungPwaBannerDitutup';
+
+function isRunningStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function isAndroidBrowser() {
+  return /Android/i.test(navigator.userAgent || '');
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  pwaDeferredPrompt = e;
+  maybeShowPwaBanner();
+});
+
+window.addEventListener('appinstalled', () => {
+  pwaDeferredPrompt = null;
+  hidePwaBanner();
+});
+
+function maybeShowPwaBanner() {
+  const banner = document.getElementById('pwaInstallBanner');
+  if (!banner) return;
+  const sudahDitutup = localStorage.getItem(PWA_DISMISS_KEY) === '1';
+  const bolehTampil = !!pwaDeferredPrompt && isAndroidBrowser() && !isRunningStandalone() && !sudahDitutup && !currentUser;
+  banner.classList.toggle('hidden', !bolehTampil);
+  if (bolehTampil) banner.classList.add('pwa-banner-show');
+}
+
+function hidePwaBanner() {
+  const banner = document.getElementById('pwaInstallBanner');
+  if (banner) banner.classList.add('hidden');
+}
+
+function pwaDismissBanner() {
+  localStorage.setItem(PWA_DISMISS_KEY, '1');
+  hidePwaBanner();
+}
+
+function pwaInstallClick() {
+  if (!pwaDeferredPrompt) return;
+  pwaDeferredPrompt.prompt();
+  pwaDeferredPrompt.userChoice.finally(() => {
+    pwaDeferredPrompt = null;
+    hidePwaBanner();
+  });
+}
+
+// Registrasi service worker — syarat wajib supaya Chrome menganggap app ini
+// "installable". Dibiarkan diam-diam gagal (mis. saat development lokal
+// tanpa https) supaya tidak mengganggu pengalaman pakai app seperti biasa.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
 }
 
 function updateClock() {
@@ -300,13 +506,16 @@ function setupDashboard() {
 
 // --- ADMIN DATA & DASHBOARD ---
 function loadAdminData() {
+  // Tampilkan skeleton dulu di tabel aktivitas selagi kedua request berjalan.
+  document.getElementById('tblRecentAdmin').innerHTML = skeletonTableRows(['20%', '25%', '15%', '30%', '15%', '15%'], 5);
+
   (async () => {
     try {
       const d = await apiRequest('getAdminDashboardData', { method: 'GET' });
-      document.getElementById('dashTotalHutang').innerText = formatRp(d.totalHutang);
-      document.getElementById('dashPendapatan').innerText = formatRp(d.pendapatan);
-      document.getElementById('dashDeposit').innerText = formatRp(d.deposit);
-      document.getElementById('dashTxCount').innerText = d.txCount;
+      animateKpiValue('dashTotalHutang', d.totalHutang, { isCurrency: true });
+      animateKpiValue('dashPendapatan', d.pendapatan, { isCurrency: true });
+      animateKpiValue('dashDeposit', d.deposit, { isCurrency: true });
+      animateKpiValue('dashTxCount', d.txCount, { isCurrency: false });
     } catch (err) {
       // Biarkan nilai default tampil bila ringkasan gagal dimuat.
     }
@@ -369,13 +578,15 @@ async function loadCustomerData(range) {
     btn.classList.toggle('active', String(btn.dataset.range) === String(range));
   });
 
+  document.getElementById('listRiwayatPelanggan').innerHTML = skeletonListCards(4);
+
   try {
     const res = await apiRequest('getRiwayatPelangganLogin', {
       method: 'GET',
       params: { nama: currentUser.nama, range: range }
     });
-    document.getElementById('custHutang').innerText = formatRp(res.saldo.sisaHutang);
-    document.getElementById('custDeposit').innerText = formatRp(res.saldo.totalDeposit);
+    animateKpiValue('custHutang', res.saldo.sisaHutang, { isCurrency: true });
+    animateKpiValue('custDeposit', res.saldo.totalDeposit, { isCurrency: true });
     cacheTransaksi(res.transaksi);
 
     let html = '';
@@ -427,7 +638,7 @@ async function bukaModalCatatJajan() {
   listProdukJajan = [];
   document.getElementById('cariProdukJajan').value = '';
   renderKeranjangJajan();
-  document.getElementById('gridProdukJajan').innerHTML = '<div class="col-span-2 sm:col-span-3 text-center text-slate-400 text-xs py-4">Memuat produk...</div>';
+  document.getElementById('gridProdukJajan').innerHTML = skeletonGridCards(6);
   bukaModal('modalCatatJajan');
 
   try {
@@ -561,7 +772,7 @@ function bukaModalStatusPesanan() {
 
 async function muatStatusPesanan() {
   const container = document.getElementById('listStatusPesanan');
-  container.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">Memuat pengajuan...</div>';
+  container.innerHTML = skeletonArticleCards(3);
   try {
     const data = await apiRequest('getPengajuanPelanggan', { method: 'POST', body: { actor: currentUser } });
     if (!Array.isArray(data) || !data.length) {
@@ -623,7 +834,7 @@ function bukaModalPengajuanAdmin() {
 
 async function muatPengajuanAdmin() {
   const container = document.getElementById('listPengajuanAdmin');
-  container.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">Memuat pengajuan...</div>';
+  container.innerHTML = skeletonArticleCards(3);
   try {
     const data = await apiRequest('getPengajuanPendingAdmin', { method: 'POST', body: { actor: currentUser } });
     if (!Array.isArray(data) || !data.length) {
@@ -706,6 +917,7 @@ async function bukaModalCatatHutang() {
   document.getElementById('cariProdukHutang').value = '';
   setDefaultWaktu('waktuTransaksiHutang');
 
+  document.getElementById('gridProdukHutang').innerHTML = skeletonGridCards(6);
   bukaModal('modalTambahHutang');
 
   try {
@@ -876,7 +1088,7 @@ let daftarPelangganGlobal = [];
 async function bukaPickerPelanggan(context) {
   pickerContext = context;
   document.getElementById('cariPelangganPicker').value = '';
-  document.getElementById('listPickerPelanggan').innerHTML = '<div class="p-6 text-center text-slate-400 text-xs">Memuat data pelanggan...</div>';
+  document.getElementById('listPickerPelanggan').innerHTML = skeletonPickerRows(6);
 
   bukaModal('modalPickerPelanggan');
   setTimeout(() => document.getElementById('cariPelangganPicker').focus(), 200);
@@ -974,6 +1186,7 @@ function bukaModalPelanggan() {
 }
 
 async function loadTabelPelanggan() {
+  document.getElementById('tblPelanggan').innerHTML = skeletonTableRows(['30%', '25%', '20%', '15%'], 4);
   try {
     const data = await apiRequest('getPelangganList', { method: 'GET' });
     let html = '';
@@ -1042,6 +1255,7 @@ function bukaModalProduk() {
 }
 
 async function loadTabelProduk() {
+  document.getElementById('tblProduk').innerHTML = skeletonTableRows(['45%', '30%', '25%'], 4);
   try {
     const data = await apiRequest('getProdukList', { method: 'GET' });
     let html = '';
@@ -1103,6 +1317,7 @@ function hpsPrd(id) {
 
 async function bukaModalLaporan() {
   bukaModal('modalLaporan');
+  document.getElementById('tblLaporan').innerHTML = skeletonTableRows(['15%', '20%', '15%', '20%', '18%', '12%'], 6);
   try {
     const data = await apiRequest('getSemuaTransaksi', { method: 'GET' });
     cacheTransaksi(data);
