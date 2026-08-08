@@ -319,12 +319,10 @@ function togglePasswordVisibility(inputId, btnEl) {
 // sudah login (lihat showView).
 // ==========================================================================
 let pwaDeferredPrompt = null;
-const PWA_DISMISS_KEY = 'warungPwaBannerDitutup';
 
 function isRunningStandalone() {
   return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
-
 function isAndroidBrowser() {
   return /Android/i.test(navigator.userAgent || '');
 }
@@ -332,31 +330,24 @@ function isAndroidBrowser() {
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   pwaDeferredPrompt = e;
-  maybeShowPwaBanner();
+  maybeShowPwaInstallBtn();
 });
 
 window.addEventListener('appinstalled', () => {
   pwaDeferredPrompt = null;
-  hidePwaBanner();
+  hidePwaInstallBtn();
 });
 
-function maybeShowPwaBanner() {
-  const banner = document.getElementById('pwaInstallBanner');
-  if (!banner) return;
-  const sudahDitutup = localStorage.getItem(PWA_DISMISS_KEY) === '1';
-  const bolehTampil = !!pwaDeferredPrompt && isAndroidBrowser() && !isRunningStandalone() && !sudahDitutup && !currentUser;
-  banner.classList.toggle('hidden', !bolehTampil);
-  if (bolehTampil) banner.classList.add('pwa-banner-show');
+function maybeShowPwaInstallBtn() {
+  const btn = document.getElementById('pwaInstallBtn');
+  if (!btn) return;
+  const bolehTampil = !!pwaDeferredPrompt && isAndroidBrowser() && !isRunningStandalone() && !currentUser;
+  btn.classList.toggle('hidden', !bolehTampil);
 }
 
-function hidePwaBanner() {
-  const banner = document.getElementById('pwaInstallBanner');
-  if (banner) banner.classList.add('hidden');
-}
-
-function pwaDismissBanner() {
-  localStorage.setItem(PWA_DISMISS_KEY, '1');
-  hidePwaBanner();
+function hidePwaInstallBtn() {
+  const btn = document.getElementById('pwaInstallBtn');
+  if (btn) btn.classList.add('hidden');
 }
 
 function pwaInstallClick() {
@@ -364,7 +355,7 @@ function pwaInstallClick() {
   pwaDeferredPrompt.prompt();
   pwaDeferredPrompt.userChoice.finally(() => {
     pwaDeferredPrompt = null;
-    hidePwaBanner();
+    hidePwaInstallBtn();
   });
 }
 
