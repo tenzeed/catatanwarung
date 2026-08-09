@@ -570,6 +570,128 @@ async function loadNotifikasiPengajuan() {
   }
 }
 
+// ==========================================================================
+// RINCIAN PENDAPATAN NON-TUNAI & PENARIKAN MANUAL (klik kartu "Pendapatan")
+// Murni monitoring tambahan — tidak pernah memanggil loadAdminData() atau
+// mengubah kartu KPI utama, persis seperti yang diminta.
+// ==========================================================================
+function tanggalHariIniLokal_() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
+async function bukaModalRincianPendapatan() {
+  bukaModal('modalRincianPendapatan');
+  document.getElementById('rpInputTanggal').value = tanggalHariIniLokal_();
+  document.getElementById('rpInputNominal').value = '';
+  document.getElementById('rpInputKeterangan').value = '';
+  await muatRincianPendapatan();
+}
+
+async function muatRincianPendapatan() {
+  const boxMetode = document.getElementById('rpBreakdownMetode');
+  const boxRiwayat = document.getElementById('rpRiwayatPenarikan');
+  boxMetode.innerHTML = '<div class="skeleton h-10 rounded-lg"></div><div class="skeleton h-10 rounded-lg"></div>';
+  boxRiwayat.innerHTML = '<div class="p-3"><div class="skeleton h-3.5 rounded" style="width:70%"></div></div>';
+
+  try {
+    const data = await apiRequest('getRincianPendapatan', { method: 'POST', body: { actor: currentUser } });
+
+    document.getElementById('rpSaldoMengendap').innerText = formatRp(data.saldoMengendap);
+    document.getElementById('rpTotalNonTunai').innerText = formatRp(data.totalNonTunai);
+    document.getElementById('rpTotalPenarikan').innerText = formatRp(data.totalPenarikan);
+
+    if (!data.breakdownMetode.length) {
+      boxMetode.innerHTML = '<div class="p-4 text-center text-slate-400 text-xs">Belum ada transaksi pembayaran.</div>';
+    } else {
+      boxMetode.innerHTML = data.breakdownMetode.map(item => `
+        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+          <span class="text-sm font-semibold text-slate-700">${escapeHTML(item.metode)}</span>
+          <span class="text-sm font-bold text-slate-800">${formatRp(item.total)}</span>
+        </div>
+      `).join('');
+    }
+
+    if (!data.riwayatPenarikan.length) {
+      boxRiwayat.innerHTML = '<div class="p-4 text-center text-slate-400 text-xs">Belum ada penarikan tercatat.</div>';
+    } else {
+      boxRiwayat.innerHTML = data.riwayatPenarikan.map(item => `
+        <div class="p-3 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <p class="text-xs font-bold text-slate-700">${escapeHTML(item.tanggal)}</p>
+            <p class="text-[11px] text-slate-400 truncate">${escapeHTML(item.keterangan || item.adminInput || '-')}</p>
+          </div>
+          <span class="text-sm font-bold text-rose-600 shrink-0">− ${formatRp(item.nominal)}</span>
+        </div>
+      `).join('');
+    }
+  } catch (err) {
+    boxMetode.innerHTML = '<div class="p-4 text-center text-rose-500 text-xs">Gagal memuat rincian.</div>';
+    boxRiwayat.innerHTML = '';
+  }
+}
+
+async function prosesCatatPenarikan() {
+  const nominal = document.getElementById('rpInputNominal').value;
+  const tanggal = document.getElementById('rpInputTanggal').value;
+  const keterangan = document.getElementById('rpInputKeterangan').value;
+
+  if (!nominal || Number(nominal) <= 0) {
+    return Swal.fire('Data Belum Lengkap', 'Isi nominal penarikan dengan benar.', 'warning');
+  }
+
+  tampilkanLoadingModern('Mencatat penarikan...');
+  try {
+    const res = await apiRequest('catatPenarikanSaldo', {
+      method: 'POST',
+      body: { actor: currentUser, payload: { nominal: nominal, tanggal: tanggal, keterangan: keterangan } }
+    });
+    if (res && res.success) {
+      Swal.close();
+      document.getElementById('rpInputNominal').value = '';
+      document.getElementById('rpInputKeterangan').value = '';
+      await muatRincianPendapatan();
+      tampilkanSuksesModern(res.message || 'Penarikan berhasil dicatat');
+    } else {
+      tampilkanGagalModern((res && res.message) || 'Penarikan tidak dapat dicatat.');
+    }
+  } catch (err) {
+    tampilkanGagalModern('Gagal mencatat penarikan. Periksa koneksi internet Anda.');
+  }
+}
+
+// ==========================================================================
+// RINCIAN DEPOSIT PELANGGAN (klik kartu "Deposit Pelanggan")
+// Sengaja tidak menyimpan cache/state sendiri — selalu ambil data terbaru
+// langsung dari server tiap dibuka, supaya otomatis sinkron dengan kartu
+// KPI utama dan sheet Saldo (mis. setelah deposit terpakai untuk Catat
+// Hutang, rincian ini ikut menyesuaikan begitu dibuka lagi).
+// ==========================================================================
+async function bukaModalRincianDeposit() {
+  bukaModal('modalRincianDeposit');
+  const container = document.getElementById('listRincianDeposit');
+  container.innerHTML = skeletonPickerRows(4);
+  try {
+    const data = await apiRequest('getRincianDeposit', { method: 'POST', body: { actor: currentUser } });
+    if (!data.length) {
+      container.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">Belum ada pelanggan dengan saldo deposit.</div>';
+      return;
+    }
+    container.innerHTML = data.map(p => `
+      <div class="flex items-center justify-between gap-2 px-4 py-3">
+        <span class="flex items-center gap-2.5 min-w-0">
+          <span class="w-8 h-8 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-xs shrink-0">${escapeHTML(String(p.nama).charAt(0).toUpperCase())}</span>
+          <span class="font-semibold text-slate-800 text-sm truncate">${escapeHTML(p.nama)}</span>
+        </span>
+        <span class="text-sm font-bold text-sky-600 shrink-0">${formatRp(p.deposit)}</span>
+      </div>
+    `).join('');
+  } catch (err) {
+    container.innerHTML = '<div class="p-8 text-center text-rose-500 text-xs">Gagal memuat rincian deposit.</div>';
+  }
+}
+
 // --- CUSTOMER DATA ---
 async function loadCustomerData(range) {
   range = range || 30;
